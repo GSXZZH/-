@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>王朴中学社区 - 投票系统</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 自定义配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1E40AF',
+                        secondary: '#93C5FD',
+                        accent: '#F59E0B',
+                    },
+                },
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .vote-progress {
+                height: 8px;
+                border-radius: 4px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- 顶部导航栏 -->
+    <header class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <!-- 网站Logo -->
+            <div class="flex items-center">
+                <img src="wpzxxh.png" alt="王朴中学社区" class="h-10 w-10 mr-2">
+                <h1 class="text-xl font-bold text-primary">王朴中学社区</h1>
+            </div>
+            
+            <!-- 导航菜单 -->
+            <nav class="hidden md:flex space-x-8">
+                <a href="home.html" class="text-gray-700 hover:text-primary transition-colors">首页</a>
+                <a href="resources.html" class="text-gray-700 hover:text-primary transition-colors">资源共享</a>
+                <a href="chat.html" class="text-gray-700 hover:text-primary transition-colors">交流中心</a>
+                <a href="vote.html" class="text-primary font-medium border-b-2 border-primary pb-1">投票系统</a>
+                <a href="#" class="text-gray-700 hover:text-primary transition-colors">关于我们</a>
+            </nav>
+            
+            <!-- 用户菜单 -->
+            <div class="flex items-center space-x-4">
+                <!-- 搜索框 -->
+                <div class="hidden md:block relative">
+                    <input type="text" placeholder="搜索..." class="pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    <i class="fa fa-search absolute left-3 top-3 text-gray-400"></i>
+                </div>
+                
+                <!-- 发布按钮 -->
+                <button id="create-vote-btn" class="bg-primary text-white px-4 py-2 rounded-full hover:bg-primary/90 transition-colors hidden md:block">
+                    <i class="fa fa-plus mr-1"></i> 创建投票
+                </button>
+                
+                <!-- 用户头像 -->
+                <div class="relative group">
+                    <img id="user-avatar" src="yhtx/default.jpg" alt="用户头像" class="w-10 h-10 rounded-full cursor-pointer border-2 border-primary/50">
+                    <!-- 用户下拉菜单 -->
+                    <div id="user-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                        <a href="profile.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">个人资料</a>
+                        <a href="settings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">设置</a>
+                        <div class="border-t border-gray-100"></div>
+                        <a href="#" id="logout-link" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">退出登录</a>
+                    </div>
+                </div>
+                
+                <!-- 移动端菜单按钮 -->
+                <button id="mobile-menu-btn" class="md:hidden text-gray-700">
+                    <i class="fa fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- 移动端菜单 -->
+        <div id="mobile-menu" class="md:hidden bg-white border-t border-gray-200 hidden">
+            <div class="container mx-auto px-4 py-3 flex flex-col space-y-4">
+                <a href="home.html" class="text-gray-700 hover:text-primary transition-colors py-2 border-b border-gray-100">首页</a>
+                <a href="resources.html" class="text-gray-700 hover:text-primary transition-colors py-2 border-b border-gray-100">资源共享</a>
+                <a href="chat.html" class="text-gray-700 hover:text-primary transition-colors py-2 border-b border-gray-100">交流中心</a>
+                <a href="vote.html" class="text-primary font-medium py-2 border-b border-gray-100">投票系统</a>
+                <a href="#" class="text-gray-700 hover:text-primary transition-colors py-2 border-b border-gray-100">关于我们</a>
+                <div class="pt-2">
+                    <button id="mobile-create-vote-btn" class="bg-primary text-white w-full px-4 py-2 rounded-full hover:bg-primary/90 transition-colors">
+                        <i class="fa fa-plus mr-1"></i> 创建投票
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- 主要内容区 -->
+    <main class="container mx-auto px-4 py-6">
+        <!-- 页面标题 -->
+        <div class="mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">投票系统</h2>
+            <p class="text-gray-600 mt-1">参与社区决策，表达你的观点</p>
+        </div>
+        
+        <!-- 创建投票模态框 -->
+        <div id="create-vote-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center">
+            <div class="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+                <div class="p-6 border-b">
+                    <h3 class="text-xl font-bold text-gray-800">创建新投票</h3>
+                    <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
+                </div>
+                <form id="create-vote-form" class="p-6">
+                    <div class="mb-4">
+                        <label for="vote-title" class="block text-sm font-medium text-gray-700 mb-1">投票标题</label>
+                        <input type="text" id="vote-title" name="title" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="vote-description" class="block text-sm font-medium text-gray-700 mb-1">投票描述</label>
+                        <textarea id="vote-description" name="description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"></textarea>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">投票选项</label>
+                        <div id="vote-options-container">
+                            <div class="flex space-x-2 mb-2">
+                                <input type="text" name="options[]" required class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                                <button type="button" class="remove-option-btn text-red-500 hover:text-red-700 hidden">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                            <div class="flex space-x-2 mb-2">
+                                <input type="text" name="options[]" required class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                                <button type="button" class="remove-option-btn text-red-500 hover:text-red-700">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="button" id="add-option-btn" class="mt-2 text-primary hover:text-primary/80 text-sm">
+                            <i class="fa fa-plus mr-1"></i> 添加选项
+                        </button>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">投票类型</label>
+                        <div class="flex space-x-4">
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" name="vote-type" value="single" checked class="text-primary focus:ring-primary/50">
+                                <span>单选</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" name="vote-type" value="multiple" class="text-primary focus:ring-primary/50">
+                                <span>多选</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" id="cancel-create-btn" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">取消</button>
+                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">创建投票</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- 投票列表 -->
+        <div class="grid md:grid-cols-2 gap-6">
+            <!-- 投票卡片将通过JavaScript动态生成 -->
+        </div>
+    </main>
+    
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-3 gap-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <img src="wpzxxh.png" alt="王朴中学社区" class="h-10 w-10 mr-2">
+                        <h3 class="text-xl font-bold">王朴中学社区</h3>
+                    </div>
+                    <p class="text-gray-400">连接师生，共建美好校园</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">快速链接</h4>
+                    <ul class="space-y-2">
+                        <li><a href="home.html" class="text-gray-400 hover:text-white transition-colors">首页</a></li>
+                        <li><a href="resources.html" class="text-gray-400 hover:text-white transition-colors">资源共享</a></li>
+                        <li><a href="chat.html" class="text-gray-400 hover:text-white transition-colors">交流中心</a></li>
+                        <li><a href="vote.html" class="text-gray-400 hover:text-white transition-colors">投票系统</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">联系方式</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><i class="fa fa-envelope mr-2"></i> contact@wpzx.edu.cn</li>
+                        <li><i class="fa fa-phone mr-2"></i> 023-12345678</li>
+                        <li><i class="fa fa-map-marker mr-2"></i> 重庆市北碚区王朴中学</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-8 pt-6 border-t border-gray-700 text-center text-gray-500">
+                <p>© 2024 王朴中学社区 版权所有</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- 引入必要的JavaScript模块 -->
+    <script src="storage.js"></script>
+    <script src="dataStore.js"></script>
+    <script src="auth.js"></script>
+    <script src="notification.js"></script>
+    
+    <!-- 投票系统JavaScript -->
+    <script>
+        // 工具类
+        class Utils {
+            static formatDate(timestamp) {
+                const date = new Date(timestamp);
+                return date.toLocaleString('zh-CN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+            
+            static generateId() {
+                return Date.now().toString(36) + Math.random().toString(36).substr(2);
+            }
+        }
+        
+        // 投票系统应用类
+        class VoteSystemApp {
+            constructor() {
+                this.currentUser = null;
+                this.votes = [];
+                this.init();
+            }
+            
+            async init() {
+                // 初始化数据存储
+                await DataStore.init();
+                
+                // 获取当前用户
+                this.currentUser = DataStore.getCurrentUser();
+                if (!this.currentUser) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+                
+                // 更新用户头像
+                this.updateUserAvatar();
+                
+                // 加载投票数据
+                await this.loadVotes();
+                
+                // 绑定事件
+                this.bindEvents();
+            }
+            
+            updateUserAvatar() {
+                const avatarElement = document.getElementById('user-avatar');
+                if (this.currentUser && this.currentUser.avatar) {
+                    avatarElement.src = this.currentUser.avatar;
+                }
+            }
+            
+            async loadVotes() {
+                this.votes = await DataStore.getVotes();
+                this.renderVotes();
+            }
+            
+            renderVotes() {
+                const container = document.querySelector('.grid.md\\:grid-cols-2.gap-6');
+                
+                if (this.votes.length === 0) {
+                    container.innerHTML = `
+                        <div class="md:col-span-2 text-center py-12">
+                            <i class="fa fa-poll text-gray-300 text-6xl mb-4"></i>
+                            <h3 class="text-lg font-medium text-gray-700 mb-1">暂无投票</h3>
+                            <p class="text-gray-500">成为第一个创建投票的人吧！</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // 按创建时间倒序排序
+                const sortedVotes = [...this.votes].sort((a, b) => b.createdAt - a.createdAt);
+                
+                container.innerHTML = sortedVotes.map(vote => `
+                    <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-lg font-bold text-gray-800">${this.escapeHtml(vote.title)}</h3>
+                            <span class="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
+                                ${vote.type === 'single' ? '单选' : '多选'}
+                            </span>
+                        </div>
+                        
+                        ${vote.description ? `<p class="text-gray-600 mb-4">${this.escapeHtml(vote.description)}</p>` : ''}
+                        
+                        <div class="space-y-3 mb-4">
+                            ${vote.options.map((option, index) => {
+                                const voteCount = vote.votes?.[option] || 0;
+                                const totalVotes = this.getTotalVotes(vote);
+                                const percentage = totalVotes > 0 ? Math.round((voteCount / totalVotes) * 100) : 0;
+                                const hasVoted = this.hasUserVoted(vote);
+                                
+                                return `
+                                    <div class="space-y-1">
+                                        <div class="flex justify-between items-center">
+                                            <label class="text-sm font-medium text-gray-700 flex items-center">
+                                                <input type="${vote.type === 'single' ? 'radio' : 'checkbox'}" 
+                                                       name="vote-option-${vote.id}" 
+                                                       value="${option}" 
+                                                       data-vote-id="${vote.id}" 
+                                                       ${hasVoted ? 'disabled' : ''} 
+                                                       class="mr-2 text-primary focus:ring-primary/50">
+                                                ${this.escapeHtml(option)}
+                                            </label>
+                                            <span class="text-sm text-gray-500">${voteCount} 票 (${percentage}%)</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                            <div class="bg-primary h-2 rounded-full" style="width: ${percentage}%"></div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        
+                        <div class="flex justify-between items-center pt-4 border-t">
+                            <div class="text-sm text-gray-500">
+                                <i class="fa fa-calendar-o mr-1"></i> ${Utils.formatDate(vote.createdAt)}
+                            </div>
+                            <div class="flex space-x-2">
+                                ${!this.hasUserVoted(vote) ? `
+                                    <button type="button" class="text-sm px-3 py-1 bg-primary text-white rounded hover:bg-primary/90 transition-colors vote-btn" data-vote-id="${vote.id}">
+                                        <i class="fa fa-check mr-1"></i> 投票
+                                    </button>
+                                ` : `
+                                    <span class="text-sm px-3 py-1 bg-green-100 text-green-700 rounded">
+                                        <i class="fa fa-check mr-1"></i> 已投票
+                                    </span>
+                                `}
+                                <span class="text-sm text-gray-500">
+                                    <i class="fa fa-users mr-1"></i> ${this.getVoterCount(vote)}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // 重新绑定投票按钮事件
+                this.bindVoteEvents();
+            }
+            
+            bindVoteEvents() {
+                const voteButtons = document.querySelectorAll('.vote-btn');
+                voteButtons.forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const voteId = e.target.dataset.voteId;
+                        this.handleVote(voteId);
+                    });
+                });
+            }
+            
+            handleVote(voteId) {
+                const vote = this.votes.find(v => v.id === voteId);
+                if (!vote) return;
+                
+                const selectedOptions = Array.from(document.querySelectorAll(`input[name="vote-option-${voteId}"]:checked`)).map(input => input.value);
+                
+                if (selectedOptions.length === 0) {
+                    window.notificationSystem.error('请选择至少一个选项');
+                    return;
+                }
+                
+                if (vote.type === 'single' && selectedOptions.length > 1) {
+                    window.notificationSystem.error('单选投票只能选择一个选项');
+                    return;
+                }
+                
+                // 更新投票数据
+                if (!vote.votes) vote.votes = {};
+                if (!vote.voters) vote.voters = [];
+                
+                selectedOptions.forEach(option => {
+                    vote.votes[option] = (vote.votes[option] || 0) + 1;
+                });
+                
+                vote.voters.push(this.currentUser.id);
+                
+                // 保存到数据存储
+                DataStore.saveVote(vote).then(() => {
+                    window.notificationSystem.success('投票成功！');
+                    this.loadVotes();
+                }).catch(error => {
+                    console.error('保存投票失败:', error);
+                    window.notificationSystem.error('投票失败，请稍后重试');
+                });
+            }
+            
+            hasUserVoted(vote) {
+                return vote.voters && vote.voters.includes(this.currentUser.id);
+            }
+            
+            getTotalVotes(vote) {
+                if (!vote.votes) return 0;
+                return Object.values(vote.votes).reduce((sum, count) => sum + count, 0);
+            }
+            
+            getVoterCount(vote) {
+                return vote.voters ? vote.voters.length : 0;
+            }
+            
+            bindEvents() {
+                // 移动端菜单
+                const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+                const mobileMenu = document.getElementById('mobile-menu');
+                
+                mobileMenuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+                
+                // 创建投票按钮
+                const createVoteBtns = [
+                    document.getElementById('create-vote-btn'),
+                    document.getElementById('mobile-create-vote-btn')
+                ];
+                
+                const createVoteModal = document.getElementById('create-vote-modal');
+                const closeModalBtn = document.getElementById('close-modal-btn');
+                const cancelCreateBtn = document.getElementById('cancel-create-btn');
+                
+                createVoteBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        createVoteModal.classList.remove('hidden');
+                        createVoteModal.classList.add('flex');
+                    });
+                });
+                
+                closeModalBtn.addEventListener('click', () => {
+                    createVoteModal.classList.add('hidden');
+                    createVoteModal.classList.remove('flex');
+                    document.getElementById('create-vote-form').reset();
+                });
+                
+                cancelCreateBtn.addEventListener('click', () => {
+                    closeModalBtn.click();
+                });
+                
+                // 点击模态框外部关闭
+                createVoteModal.addEventListener('click', (e) => {
+                    if (e.target === createVoteModal) {
+                        closeModalBtn.click();
+                    }
+                });
+                
+                // 添加/删除选项
+                const addOptionBtn = document.getElementById('add-option-btn');
+                const optionsContainer = document.getElementById('vote-options-container');
+                
+                addOptionBtn.addEventListener('click', () => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'flex space-x-2 mb-2';
+                    optionDiv.innerHTML = `
+                        <input type="text" name="options[]" required class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                        <button type="button" class="remove-option-btn text-red-500 hover:text-red-700">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    `;
+                    optionsContainer.appendChild(optionDiv);
+                    
+                    // 绑定删除按钮事件
+                    this.bindRemoveOptionEvents();
+                });
+                
+                // 初始绑定删除按钮事件
+                this.bindRemoveOptionEvents();
+                
+                // 创建投票表单提交
+                const createVoteForm = document.getElementById('create-vote-form');
+                createVoteForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleCreateVote(e.target);
+                });
+                
+                // 退出登录
+                const logoutLink = document.getElementById('logout-link');
+                logoutLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    DataStore.clearCurrentUser();
+                    window.location.href = 'index.html';
+                });
+            }
+            
+            bindRemoveOptionEvents() {
+                const removeButtons = document.querySelectorAll('.remove-option-btn');
+                removeButtons.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const optionDivs = document.querySelectorAll('#vote-options-container > div');
+                        if (optionDivs.length > 2) {
+                            e.target.closest('.flex').remove();
+                        }
+                    });
+                });
+            }
+            
+            async handleCreateVote(form) {
+                const formData = new FormData(form);
+                const title = formData.get('title');
+                const description = formData.get('description');
+                const options = Array.from(formData.getAll('options[]')).filter(opt => opt.trim() !== '');
+                const type = formData.get('vote-type');
+                
+                // 验证
+                if (!title.trim()) {
+                    window.notificationSystem.error('请输入投票标题');
+                    return;
+                }
+                
+                if (options.length < 2) {
+                    window.notificationSystem.error('至少需要2个投票选项');
+                    return;
+                }
+                
+                // 创建投票对象
+                const vote = {
+                    id: Utils.generateId(),
+                    title: title.trim(),
+                    description: description.trim(),
+                    options: options,
+                    type: type,
+                    createdAt: Date.now(),
+                    createdBy: this.currentUser.id,
+                    votes: {},
+                    voters: []
+                };
+                
+                try {
+                    // 保存到数据存储
+                    await DataStore.saveVote(vote);
+                    
+                    // 关闭模态框
+                    document.getElementById('close-modal-btn').click();
+                    
+                    // 重新加载投票列表
+                    await this.loadVotes();
+                    
+                    window.notificationSystem.success('投票创建成功！');
+                } catch (error) {
+                    console.error('创建投票失败:', error);
+                    window.notificationSystem.error('创建投票失败，请稍后重试');
+                }
+            }
+            
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+        
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', () => {
+            new VoteSystemApp();
+        });
+    </script>
+</body>
+</html>

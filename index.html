@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>王朴中学社区 - 登录/注册</title>
+    <!-- Tailwind CSS v3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 数据持久化存储 -->
+    <script src="storage.js"></script>
+    <!-- 引入数据存储模块 -->
+    <script src="dataStore.js"></script>
+    <script src="notification.js"></script>
+    <!-- 身份验证服务 -->
+    <script src="auth.js"></script>
+    <!-- 统一的 Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#dc2626',
+                        secondary: '#f87171',
+                        dark: '#b91c1c',
+                        light: '#fef2f2',
+                        gray: '#f3f4f6'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .transition-smooth {
+                transition: all 0.3s ease;
+            }
+            .shadow-custom {
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray min-h-screen">
+    <!-- 登录/注册页面 -->
+    <div id="auth-page" class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-custom w-full max-w-md overflow-hidden">
+            <div class="p-6">
+                <div class="flex justify-center mb-6">
+                    <img src="wpzxxh.png" alt="王朴中学校徽" class="h-24">
+                </div>
+                <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">王朴中学社区</h1>
+                
+                <!-- 登录表单 -->
+                <div id="login-form" class="space-y-4">
+                    <div class="relative">
+                            <label for="login-username" class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
+                            <input type="text" id="login-username" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="请输入用户名" required>
+                            <div id="login-username-error" class="absolute -bottom-5 left-0 text-xs text-red-500 hidden">用户名不能为空</div>
+                        </div>
+                        <div class="relative">
+                            <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+                            <input type="password" id="login-password" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="请输入密码" required>
+                            <div id="login-password-error" class="absolute -bottom-5 left-0 text-xs text-red-500 hidden">密码不能为空</div>
+                        </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <input id="remember-me" type="checkbox" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                            <label for="remember-me" class="ml-2 block text-sm text-gray-700">记住我</label>
+                        </div>
+                        <a href="#" id="forgot-password" class="text-sm text-primary hover:text-dark">忘记密码?</a>
+                    </div>
+                    <div>
+                        <button type="button" id="login-button" class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-smooth">登录</button>
+                    </div>
+                    <p class="text-center text-sm text-gray-600">
+                        还没有账号? <a href="#" id="show-register" class="text-primary hover:text-dark font-medium">立即注册</a>
+                    </p>
+                </div>
+                
+                <!-- 注册表单 -->
+                <div id="register-form" class="space-y-4 hidden">
+                    <div class="relative">
+                        <label for="register-username" class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
+                        <input type="text" id="register-username" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="请输入用户名" required>
+                        <div id="register-username-error" class="absolute -bottom-5 left-0 text-xs text-red-500 hidden">用户名不能为空</div>
+                    </div>
+                    <div class="relative">
+                        <label for="register-password" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+                        <input type="password" id="register-password" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="请输入密码" required>
+                        <div id="register-password-error" class="absolute -bottom-5 left-0 text-xs text-red-500 hidden">密码长度不能少于6位</div>
+                        <div id="register-password-strength" class="absolute -bottom-5 left-0 text-xs text-gray-500 hidden">
+                            <span id="password-strength-text">密码强度：</span>
+                            <span id="password-strength-bar" class="inline-block w-16 h-2 bg-gray rounded-full ml-1"></span>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <label for="register-confirm-password" class="block text-sm font-medium text-gray-700 mb-1">确认密码</label>
+                        <input type="password" id="register-confirm-password" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="请再次输入密码" required>
+                        <div id="register-confirm-password-error" class="absolute -bottom-5 left-0 text-xs text-red-500 hidden">两次输入的密码不一致</div>
+                    </div>
+                    <div class="relative">
+                        <label for="register-name" class="block text-sm font-medium text-gray-700 mb-1">真实姓名</label>
+                        <input type="text" id="register-name" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="请输入真实姓名" required>
+                        <div id="register-name-error" class="absolute -bottom-5 left-0 text-xs text-red-500 hidden">姓名不能为空</div>
+                    </div>
+                    <div class="relative">
+                        <label for="register-role" class="block text-sm font-medium text-gray-700 mb-1">身份</label>
+                        <select id="register-role" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" required>
+                            <option value="">请选择身份</option>
+                            <option value="student">学生</option>
+                            <option value="teacher">教师</option>
+                            <option value="parent">家长</option>
+                        </select>
+                        <div id="register-role-error" class="absolute -bottom-5 left-0 text-xs text-red-500 hidden">请选择身份</div>
+                    </div>
+                    <div>
+                        <button type="button" id="register-button" class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-smooth">注册</button>
+                    </div>
+                    <p class="text-center text-sm text-gray-600">
+                        已有账号? <a href="#" id="show-login" class="text-primary hover:text-dark font-medium">立即登录</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // 等待DataStore初始化完成
+        async function ensureDataStoreInitialized() {
+            if (window.DataStore && typeof window.DataStore.init === 'function') {
+                try {
+                    await window.DataStore.init();
+                } catch (error) {
+                    console.error('Error initializing DataStore:', error);
+                }
+            }
+        }
+
+        // 工具函数
+        const Utils = {
+            // 格式化日期时间
+            formatDateTime(timestamp) {
+                const date = new Date(timestamp);
+                return date.toLocaleString('zh-CN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            },
+            
+            // 生成随机字符串
+            generateRandomString(length = 8) {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                let result = '';
+                for (let i = 0; i < length; i++) {
+                    result += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return result;
+            },
+            
+            // 文件大小格式化
+            formatFileSize(bytes) {
+                if (bytes < 1024) return bytes + ' B';
+                else if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
+                else return (bytes / 1048576).toFixed(2) + ' MB';
+            },
+            
+            // 获取文件图标
+            getFileIcon(fileType) {
+                if (fileType.startsWith('image/')) return 'fa-file-image-o';
+                if (fileType.startsWith('audio/')) return 'fa-file-audio-o';
+                if (fileType.startsWith('video/')) return 'fa-file-video-o';
+                if (fileType.includes('pdf')) return 'fa-file-pdf-o';
+                if (fileType.includes('word') || fileType.includes('doc')) return 'fa-file-word-o';
+                if (fileType.includes('excel') || fileType.includes('spreadsheet')) return 'fa-file-excel-o';
+                if (fileType.includes('powerpoint') || fileType.includes('presentation')) return 'fa-file-powerpoint-o';
+                if (fileType.includes('text') || fileType.includes('plain')) return 'fa-file-text-o';
+                return 'fa-file-o';
+            }
+        };
+
+        // 应用主类
+        class WangpuCommunityApp {
+            constructor() {
+                this.currentSection = 'home-section';
+                this.currentConversation = null;
+                this.selectedFiles = [];
+                this.init();
+            }
+            
+            // 初始化应用
+            async init() {
+                // 初始化数据存储
+                DataStore.init();
+                
+                // 如果有持久化存储，先从IndexedDB加载数据到localStorage
+                if (window.persistentStorage) {
+                    try {
+                        await persistentStorage.initDB();
+                        await persistentStorage.loadDBToLocalStorage();
+                        console.log('已从持久化存储加载数据');
+                    } catch (error) {
+                        console.warn('从持久化存储加载数据失败:', error);
+                    }
+                }
+                
+                // 检查用户是否已登录
+                await this.checkLoginStatus();
+                
+                // 绑定事件
+                this.bindEvents();
+            }
+            
+            // 检查登录状态
+            async checkLoginStatus() {
+                const currentUser = DataStore.getCurrentUser();
+                if (currentUser) {
+                    // 用户已登录，显示主页面
+                    this.showMainPage();
+                } else {
+                    // 用户未登录，显示登录页面
+                    this.showAuthPage();
+                }
+            }
+            
+            // 显示登录/注册页面
+            showAuthPage() {
+                const authPage = document.getElementById('auth-page');
+                const mainPage = document.getElementById('main-page');
+                
+                if (authPage) {
+                    authPage.classList.remove('hidden');
+                }
+                
+                if (mainPage) {
+                    mainPage.classList.add('hidden');
+                }
+            }
+            
+            // 显示主页面
+            showMainPage() {
+                const authPage = document.getElementById('auth-page');
+                const mainPage = document.getElementById('main-page');
+                
+                if (authPage) {
+                    authPage.classList.add('hidden');
+                }
+                
+                if (mainPage) {
+                    mainPage.classList.remove('hidden');
+                }
+                
+                // 更新用户信息
+                this.updateUserInfo();
+                
+                // 加载首页内容
+                this.loadHomeContent();
+                
+                // 默认显示首页
+                this.showSection('home-section');
+            }
+            
+            // 更新用户信息
+            updateUserInfo() {
+                const currentUser = DataStore.getCurrentUser();
+                if (currentUser) {
+                    // 优先使用avatarData（base64数据）进行预览，如果没有则使用avatar路径
+                    const avatarSrc = currentUser.avatarData || currentUser.avatar;
+                    document.getElementById('user-avatar').src = avatarSrc;
+                    document.getElementById('user-name').textContent = currentUser.name;
+                    document.getElementById('avatar-preview').src = avatarSrc;
+                    document.getElementById('settings-username').value = currentUser.username;
+                    document.getElementById('settings-name').value = currentUser.name;
+                    document.getElementById('settings-role').value = currentUser.role;
+                    document.getElementById('settings-bio').value = currentUser.bio || '';
+                }
+            }
+            
+            // 显示指定部分
+            showSection(sectionId) {
+                // 隐藏所有部分
+                document.querySelectorAll('.section-content').forEach(section => {
+                    section.classList.add('hidden');
+                });
+                
+                // 显示指定部分
+                document.getElementById(sectionId).classList.remove('hidden');
+                
+                // 更新当前部分
+                this.currentSection = sectionId;
+                
+                // 如果是聊天部分，加载聊天列表
+                if (sectionId === 'chat-section') {
+                    this.loadChatList();
+                }
+                
+                // 如果是资源部分，加载资源列表
+                if (sectionId === 'resources-section') {
+                    this.loadResourcesList();
+                }
+            }
+            
+            // 加载首页内容
+            loadHomeContent() {
+                // 加载动态
+                this.loadNewsFeed();
+                
+                // 加载公告
+                this.loadAnnouncements();
+            }
+            
+            // 加载动态
+            loadNewsFeed() {
+                const posts = DataStore.getPosts();
+                const newsFeed = document.getElementById('news-feed');
+                
+                if (posts.length === 0) {
+                    newsFeed.innerHTML = '<p class="text-gray-500 text-center italic">暂无动态</p>';
+                    return;
+                }
+                
+                newsFeed.innerHTML = '';
+                posts.forEach(post => {
+                    const user = DataStore.getUserById(post.author);
+                    if (user) {
+                        const postElement = document.createElement('div');
+                        postElement.className = 'bg-white rounded-lg p-3 shadow-sm';
+                        postElement.innerHTML = `
+                            <div class="flex items-center mb-2">
+                                <img src="${user.avatar}" alt="${user.name}" class="w-8 h-8 rounded-full mr-2">
+                                <div>
+                                    <p class="font-medium text-gray-800">${user.name}</p>
+                                    <p class="text-xs text-gray-500">${Utils.formatDateTime(post.timestamp)}</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-700">${post.content}</p>
+                        `;
+                        newsFeed.appendChild(postElement);
+                    }
+                });
+            }
+            
+            // 加载公告
+            loadAnnouncements() {
+                const announcements = DataStore.getAnnouncements();
+                const announcementsContainer = document.getElementById('announcements');
+                
+                if (announcements.length === 0) {
+                    announcementsContainer.innerHTML = '<p class="text-gray-500 text-center italic">暂无公告</p>';
+                    return;
+                }
+                
+                announcementsContainer.innerHTML = '';
+                announcements.forEach(announcement => {
+                    const user = DataStore.getUserByUsername(announcement.author);
+                    if (user) {
+                        const announcementElement = document.createElement('div');
+                        announcementElement.className = 'bg-white rounded-lg p-3 shadow-sm';
+                        announcementElement.innerHTML = `
+                            <div class="flex items-center mb-2">
+                                <img src="${user.avatar}" alt="${user.name}" class="w-8 h-8 rounded-full mr-2">
+                                <div>
+                                    <p class="font-medium text-gray-800">${user.name}</p>
+                                    <p class="text-xs text-gray-500">${Utils.formatDateTime(announcement.timestamp)}</p>
+                                </div>
+                            </div>
+                            <h4 class="font-semibold text-primary mb-1">${announcement.title}</h4>
+                            <p class="text-gray-700">${announcement.content}</p>
+                        `;
+                        announcementsContainer.appendChild(announcementElement);
+                    }
+                });
+            }
+            
+            // 加载聊天列表
+            loadChatList() {
+                const currentUser = DataStore.getCurrentUser();
+                const conversations = DataStore.getConversations();
+                const chatList = document.getElementById('chat-list');
+                
+                // 获取其他用户
+                const otherUsers = DataStore.getUsers().filter(user => user.id !== currentUser.id);
+                
+                // 清空聊天列表
+                chatList.innerHTML = '';
+                
+                // 如果没有其他用户，显示提示
+                if (otherUsers.length === 0) {
+                    chatList.innerHTML = '<div class="text-gray-500 text-center italic py-4">没有其他用户可以聊天</div>';
+                    return;
+                }
+                
+                // 为每个用户创建聊天项
+                otherUsers.forEach(user => {
+                    // 查找与该用户的对话
+                    const conversation = DataStore.getConversationBetween(currentUser.id, user.id);
+                    
+                    // 获取最后一条消息
+                    const lastMessage = conversation && conversation.messages.length > 0 
+                        ? conversation.messages[conversation.messages.length - 1] 
+                        : null;
+                    
+                    // 创建聊天项
+                    const chatItem = document.createElement('div');
+                    chatItem.className = 'p-4 border-b border-gray-100 hover:bg-gray cursor-pointer';
+                    chatItem.dataset.userId = user.id;
+                    
+                    // 格式化最后一条消息时间
+                    const lastMessageTime = lastMessage 
+                        ? Utils.formatDateTime(lastMessage.timestamp).split(' ')[1] 
+                        : '';
+                    
+                    // 设置聊天项内容
+                    chatItem.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <img src="${user.avatar}" alt="${user.name}" class="w-10 h-10 rounded-full mr-3">
+                                <div>
+                                    <h4 class="font-medium text-gray-800">${user.name}</h4>
+                                    <p class="text-xs text-gray-500 truncate w-48">${lastMessage ? lastMessage.text : '点击开始聊天'}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs text-gray-500">${lastMessageTime}</span>
+                                ${lastMessage && lastMessage.sender !== currentUser.id ? '<span class="inline-block w-2 h-2 bg-primary rounded-full mt-2"></span>' : ''}
+                            </div>
+                        </div>
+                    `;
+                    
+                    // 添加点击事件
+                    chatItem.addEventListener('click', () => {
+                        this.openChat(user.id);
+                    });
+                    
+                    chatList.appendChild(chatItem);
+                });
+            }
+            
+            // 打开聊天窗口
+            openChat(userId) {
+                const currentUser = DataStore.getCurrentUser();
+                const user = DataStore.getUserById(userId);
+                
+                if (!user) return;
+                
+                // 更新聊天头部
+                document.getElementById('chat-partner-name').textContent = user.name;
+                document.getElementById('chat-header').querySelector('img')?.remove();
+                const avatarElement = document.createElement('img');
+                avatarElement.src = user.avatar;
+                avatarElement.alt = user.name;
+                avatarElement.className = 'w-10 h-10 rounded-full mr-3';
+                document.getElementById('chat-header').querySelector('.flex.items-center').prepend(avatarElement);
+                
+                // 查找或创建对话
+                let conversation = DataStore.getConversationBetween(currentUser.id, userId);
+                if (!conversation) {
+                    conversation = DataStore.addConversation({
+                        participants: [currentUser.id, userId],
+                        messages: []
+                    });
+                }
+                
+                // 更新当前对话
+                this.currentConversation = conversation;
+                
+                // 加载聊天消息
+                this.loadChatMessages();
+                
+                // 清空消息输入框
+                document.getElementById('message-input').value = '';
+                
+                // 聚焦消息输入框
+                document.getElementById('message-input').focus();
+            }
+            
+            // 加载聊天消息
+            loadChatMessages() {
+                const chatMessages = document.getElementById('chat-messages');
+                
+                if (!this.currentConversation || this.currentConversation.messages.length === 0) {
+                    chatMessages.innerHTML = `
+                        <div class="flex justify-center">
+                            <p class="text-gray-500 text-sm italic">开始与 ${document.getElementById('chat-partner-name').textContent} 的对话吧</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                chatMessages.innerHTML = '';
+                
+                // 按日期分组消息
+                const messagesByDate = {};
+                this.currentConversation.messages.forEach(message => {
+                    const date = new Date(message.timestamp).toLocaleDateString('zh-CN');
+                    if (!messagesByDate[date]) {
+                        messagesByDate[date] = [];
+                    }
+                    messagesByDate[date].push(message);
+                });
+                
+                // 创建消息元素
+                Object.keys(messagesByDate).forEach(date => {
+                    // 添加日期分隔线
+                    const dateElement = document.createElement('div');
+                    dateElement.className = 'flex justify-center my-4';
+                    dateElement.innerHTML = `<span class="bg-gray text-gray-500 text-xs px-3 py-1 rounded-full">${date}</span>`;
+                    chatMessages.appendChild(dateElement);
+                    
+                    // 添加该日期的消息
+                    messagesByDate[date].forEach(message => {
+                        const currentUser = DataStore.getCurrentUser();
+                        const isCurrentUser = message.sender === currentUser.id;
+                        const user = DataStore.getUserById(message.sender);
+                        
+                        if (!user) return;
+                        
+                        const messageElement = document.createElement('div');
+                        messageElement.className = `flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`;
+                        
+                        const messageContent = document.createElement('div');
+                        messageContent.className = `${isCurrentUser ? 'bg-primary text-white' : 'bg-gray text-gray-800'} rounded-lg py-2 px-4 max-w-[70%]`;
+                        
+                        const messageText = document.createElement('p');
+                        messageText.textContent = message.text;
+                        
+                        const messageTime = document.createElement('span');
+                        messageTime.className = `text-xs ${isCurrentUser ? 'text-light' : 'text-gray-500'} mt-1 block text-right`;
+                        messageTime.textContent = Utils.formatDateTime(message.timestamp).split(' ')[1];
+                        
+                        messageContent.appendChild(messageText);
+                        messageContent.appendChild(messageTime);
+                        
+                        if (!isCurrentUser) {
+                            const avatarElement = document.createElement('img');
+                            avatarElement.src = user.avatar;
+                            avatarElement.alt = user.name;
+                            avatarElement.className = 'w-8 h-8 rounded-full mr-2 mt-1';
+                            messageElement.appendChild(avatarElement);
+                        }
+                        
+                        messageElement.appendChild(messageContent);
+                        
+                        if (isCurrentUser) {
+                            messageElement.appendChild(messageContent);
+                        }
+                        
+                        chatMessages.appendChild(messageElement);
+                    });
+                });
+                
+                // 滚动到底部
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            // 发送消息
+            sendMessage() {
+                const currentUser = DataStore.getCurrentUser();
+                const messageInput = document.getElementById('message-input');
+                const messageText = messageInput.value.trim();
+                
+                if (!this.currentConversation || !messageText) return;
+                
+                // 添加消息
+                const message = DataStore.addMessage(this.currentConversation.id, {
+                    sender: currentUser.id,
+                    text: messageText
+                });
+                
+                if (message) {
+                    // 清空输入框
+                    messageInput.value = '';
+                    
+                    // 重新加载消息
+                    this.loadChatMessages();
+                }
+            }
+            
+            // 加载资源列表
+            loadResourcesList() {
+                const files = DataStore.getFiles();
+                const tableBody = document.getElementById('resources-table-body');
+                
+                if (files.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">暂无资源</td></tr>';
+                    return;
+                }
+                
+                tableBody.innerHTML = '';
+                files.forEach(file => {
+                    const uploader = DataStore.getUserById(file.uploader);
+                    const fileIcon = Utils.getFileIcon(file.type);
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <i class="fa ${fileIcon} text-primary mr-2"></i>
+                                <span class="font-medium text-gray-900">${file.name}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${file.type}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${Utils.formatFileSize(file.size)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${uploader ? uploader.name : '未知用户'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${Utils.formatDateTime(file.timestamp)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <a href="#" class="text-primary hover:text-dark download-file" data-file-id="${file.id}">下载</a>
+                        </td>
+                    `;
+                    
+                    tableBody.appendChild(row);
+                });
+                
+                // 添加下载事件
+                document.querySelectorAll('.download-file').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const fileId = link.dataset.fileId;
+                        this.downloadFile(fileId);
+                    });
+                });
+            }
+            
+            // 下载文件
+            downloadFile(fileId) {
+                const file = DataStore.getFiles().find(f => f.id === fileId);
+                if (!file) return;
+                
+                // 创建下载链接
+                const link = document.createElement('a');
+                link.href = file.url;
+                link.download = file.name;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // 显示提示
+                alert('文件下载已开始');
+            }
+            
+            // 处理文件上传
+            handleFileUpload(files) {
+                if (!files || files.length === 0) return;
+                
+                this.selectedFiles = Array.from(files);
+                
+                // 显示上传预览
+                const uploadPreview = document.getElementById('upload-preview');
+                const fileList = document.getElementById('file-list');
+                
+                uploadPreview.classList.remove('hidden');
+                fileList.innerHTML = '';
+                
+                this.selectedFiles.forEach(file => {
+                    const fileIcon = Utils.getFileIcon(file.type);
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'flex items-center justify-between p-2 bg-white rounded-md shadow-sm';
+                    fileItem.innerHTML = `
+                        <div class="flex items-center">
+                            <i class="fa ${fileIcon} text-primary mr-2"></i>
+                            <div>
+                                <p class="text-sm font-medium text-gray-800 truncate max-w-xs">${file.name}</p>
+                                <p class="text-xs text-gray-500">${Utils.formatFileSize(file.size)}</p>
+                            </div>
+                        </div>
+                        <button class="text-gray-500 hover:text-primary remove-file" data-index="${this.selectedFiles.indexOf(file)}">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    `;
+                    fileList.appendChild(fileItem);
+                });
+                
+                // 添加移除文件事件
+                document.querySelectorAll('.remove-file').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const index = parseInt(button.dataset.index);
+                        this.selectedFiles.splice(index, 1);
+                        this.handleFileUpload(this.selectedFiles);
+                    });
+                });
+            }
+            
+            // 提交文件上传
+            submitFileUpload() {
+                if (this.selectedFiles.length === 0) return;
+                
+                const currentUser = DataStore.getCurrentUser();
+                
+                this.selectedFiles.forEach(file => {
+                    // 创建文件读取器
+                    const reader = new FileReader();
+                    
+                    reader.onload = (e) => {
+                        // 模拟文件上传
+                        const fileData = {
+                            name: file.name,
+                            type: file.type,
+                            size: file.size,
+                            uploader: currentUser.id,
+                            url: e.target.result // 在实际应用中，这里应该是服务器返回的文件URL
+                        };
+                        
+                        // 保存文件信息
+                        DataStore.addFile(fileData);
+                    };
+                    
+                    reader.readAsDataURL(file);
+                });
+                
+                // 重置选择的文件
+                this.selectedFiles = [];
+                
+                // 隐藏上传预览
+                document.getElementById('upload-preview').classList.add('hidden');
+                
+                // 重新加载资源列表
+                this.loadResourcesList();
+                
+                // 显示提示
+                alert('文件上传成功');
+            }
+            
+            // 发布动态
+            postContent() {
+                const currentUser = DataStore.getCurrentUser();
+                const postContent = document.getElementById('post-content').value.trim();
+                
+                if (!postContent) return;
+                
+                // 创建动态
+                const post = DataStore.addPost({
+                    author: currentUser.id,
+                    content: postContent
+                });
+                
+                if (post) {
+                    // 清空输入框
+                    document.getElementById('post-content').value = '';
+                    
+                    // 重新加载动态
+                    this.loadNewsFeed();
+                    
+                    // 显示提示
+                    alert('发布成功');
+                }
+            }
+            
+            // 更新头像
+            updateAvatar(file) {
+                if (!file) return;
+                
+                const currentUser = DataStore.getCurrentUser();
+                
+                // 创建文件读取器
+                const reader = new FileReader();
+                
+                reader.onload = (e) => {
+                    // 生成唯一的文件名，使用用户名和时间戳
+                    const timestamp = Date.now();
+                    const fileExtension = file.name.split('.').pop() || 'jpg';
+                    const avatarFileName = `${currentUser.username}_${timestamp}.${fileExtension}`;
+                    const avatarPath = `yhtx/${avatarFileName}`;
+                    
+                    // 更新用户头像，同时保存base64数据用于预览
+                    const updatedUser = {
+                        ...currentUser,
+                        avatar: avatarPath,
+                        avatarData: e.target.result // 保存base64数据用于预览
+                    };
+                    
+                    // 保存用户信息
+                    if (DataStore.updateUser(updatedUser)) {
+                        // 更新用户信息显示
+                        this.updateUserInfo();
+                        
+                        // 在实际环境中，这里应该有上传文件到服务器的逻辑
+                        console.log('头像应上传到:', avatarPath);
+                        
+                        // 显示提示
+                        alert('头像更新成功');
+                    }
+                };
+                
+                reader.readAsDataURL(file);
+            }
+            
+            // 更新个人信息
+            updateProfile() {
+                const currentUser = DataStore.getCurrentUser();
+                const name = document.getElementById('settings-name').value.trim();
+                const bio = document.getElementById('settings-bio').value.trim();
+                
+                if (!name) {
+                    alert('请输入真实姓名');
+                    return;
+                }
+                
+                // 更新用户信息
+                const updatedUser = {
+                    ...currentUser,
+                    name,
+                    bio
+                };
+                
+                // 保存用户信息
+                if (DataStore.updateUser(updatedUser)) {
+                    // 更新用户信息显示
+                    this.updateUserInfo();
+                    
+                    // 显示提示
+                    alert('个人信息更新成功');
+                }
+            }
+            
+            // 修改密码
+            async changePassword() {
+                const currentUser = DataStore.getCurrentUser();
+                const currentPassword = document.getElementById('current-password').value;
+                const newPassword = document.getElementById('new-password').value;
+                const confirmPassword = document.getElementById('confirm-password').value;
+                
+                // 验证当前密码
+                let currentPasswordValid = false;
+                if (currentUser.salt && window.authService) {
+                    currentPasswordValid = await authService.verifyPassword(currentPassword, currentUser.password, currentUser.salt);
+                } else {
+                    currentPasswordValid = (currentUser.password === currentPassword);
+                }
+                
+                if (!currentPasswordValid) {
+                    alert('当前密码不正确');
+                    return;
+                }
+                
+                // 验证新密码
+                if (window.authService) {
+                    const passwordValidation = authService.validatePasswordStrength(newPassword);
+                    if (!passwordValidation.valid) {
+                        alert(passwordValidation.message);
+                        return;
+                    }
+                } else if (newPassword.length < 6) {
+                    alert('新密码长度不能少于6位');
+                    return;
+                }
+                
+                // 验证确认密码
+                if (newPassword !== confirmPassword) {
+                    alert('两次输入的新密码不一致');
+                    return;
+                }
+                
+                // 更新密码
+                const updatedUser = {
+                    ...currentUser
+                };
+                
+                // 加密新密码
+                if (window.authService) {
+                    const salt = authService.generateSalt();
+                    updatedUser.password = await authService.hashPassword(newPassword, salt);
+                    updatedUser.salt = salt;
+                } else {
+                    updatedUser.password = newPassword;
+                }
+                
+                // 保存用户信息
+                if (DataStore.updateUser(updatedUser)) {
+                    // 清空输入框
+                    document.getElementById('current-password').value = '';
+                    document.getElementById('new-password').value = '';
+                    document.getElementById('confirm-password').value = '';
+                    
+                    // 显示提示
+                    alert('密码修改成功，请重新登录');
+                    
+                    // 退出登录
+                    this.logout();
+                }
+            }
+            
+            // 验证登录表单
+            validateLoginForm() {
+                let isValid = true;
+                
+                // 验证用户名
+                const username = document.getElementById('login-username').value.trim();
+                const usernameError = document.getElementById('login-username-error');
+                if (!username) {
+                    document.getElementById('login-username').classList.add('border-red-500');
+                    usernameError.classList.remove('hidden');
+                    isValid = false;
+                } else {
+                    document.getElementById('login-username').classList.remove('border-red-500');
+                    usernameError.classList.add('hidden');
+                }
+                
+                // 验证密码
+                const password = document.getElementById('login-password').value;
+                const passwordError = document.getElementById('login-password-error');
+                if (!password) {
+                    document.getElementById('login-password').classList.add('border-red-500');
+                    passwordError.classList.remove('hidden');
+                    isValid = false;
+                } else {
+                    document.getElementById('login-password').classList.remove('border-red-500');
+                    passwordError.classList.add('hidden');
+                }
+                
+                return isValid;
+            }
+            
+            // 实时验证密码强度
+            validatePasswordStrength(password) {
+                const strengthText = document.getElementById('password-strength-text');
+                const strengthBar = document.getElementById('password-strength-bar');
+                
+                let strength = 0;
+                let strengthLabel = '';
+                let barColor = '';
+                
+                if (password.length > 0) {
+                    document.getElementById('register-password-strength').classList.remove('hidden');
+                    document.getElementById('register-password-error').classList.add('hidden');
+                    
+                    // 长度检查
+                    if (password.length >= 6) strength += 1;
+                    if (password.length >= 10) strength += 1;
+                    
+                    // 复杂度检查
+                    if (/[A-Z]/.test(password)) strength += 1;
+                    if (/[a-z]/.test(password)) strength += 1;
+                    if (/[0-9]/.test(password)) strength += 1;
+                    if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+                    
+                    // 计算强度百分比
+                    const percentage = (strength / 6) * 100;
+                    
+                    // 设置强度标签和颜色
+                    if (percentage <= 33) {
+                        strengthLabel = '弱';
+                        barColor = 'bg-red-500';
+                    } else if (percentage <= 66) {
+                        strengthLabel = '中';
+                        barColor = 'bg-yellow-500';
+                    } else {
+                        strengthLabel = '强';
+                        barColor = 'bg-green-500';
+                    }
+                    
+                    // 更新UI
+                    strengthText.textContent = `密码强度：${strengthLabel}`;
+                    strengthBar.className = `inline-block h-2 bg-gray rounded-full ml-1 transition-all duration-300`;
+                    strengthBar.style.width = `${percentage}%`;
+                    strengthBar.classList.add(barColor);
+                } else {
+                    document.getElementById('register-password-strength').classList.add('hidden');
+                }
+                
+                return percentage;
+            }
+            
+            // 验证注册表单
+            async validateRegisterForm() {
+                let isValid = true;
+                
+                // 验证用户名
+                const username = document.getElementById('register-username').value.trim();
+                const usernameError = document.getElementById('register-username-error');
+                if (!username) {
+                    document.getElementById('register-username').classList.add('border-red-500');
+                    usernameError.textContent = '用户名不能为空';
+                    usernameError.classList.remove('hidden');
+                    isValid = false;
+                } else {
+                    // 检查用户名是否已存在
+                    const existingUser = await DataStore.getUserByUsername(username);
+                    if (existingUser) {
+                        document.getElementById('register-username').classList.add('border-red-500');
+                        usernameError.textContent = '用户名已存在';
+                        usernameError.classList.remove('hidden');
+                        isValid = false;
+                    } else {
+                        document.getElementById('register-username').classList.remove('border-red-500');
+                        usernameError.classList.add('hidden');
+                    }
+                }
+                
+                // 验证密码
+                const password = document.getElementById('register-password').value;
+                const passwordError = document.getElementById('register-password-error');
+                if (password.length < 6) {
+                    document.getElementById('register-password').classList.add('border-red-500');
+                    passwordError.classList.remove('hidden');
+                    isValid = false;
+                } else {
+                    document.getElementById('register-password').classList.remove('border-red-500');
+                    passwordError.classList.add('hidden');
+                }
+                
+                // 验证确认密码
+                const confirmPassword = document.getElementById('register-confirm-password').value;
+                const confirmPasswordError = document.getElementById('register-confirm-password-error');
+                if (password !== confirmPassword) {
+                    document.getElementById('register-confirm-password').classList.add('border-red-500');
+                    confirmPasswordError.classList.remove('hidden');
+                    isValid = false;
+                } else {
+                    document.getElementById('register-confirm-password').classList.remove('border-red-500');
+                    confirmPasswordError.classList.add('hidden');
+                }
+                
+                // 验证姓名
+                const name = document.getElementById('register-name').value.trim();
+                const nameError = document.getElementById('register-name-error');
+                if (!name) {
+                    document.getElementById('register-name').classList.add('border-red-500');
+                    nameError.classList.remove('hidden');
+                    isValid = false;
+                } else {
+                    document.getElementById('register-name').classList.remove('border-red-500');
+                    nameError.classList.add('hidden');
+                }
+                
+                // 验证身份
+                const role = document.getElementById('register-role').value;
+                const roleError = document.getElementById('register-role-error');
+                if (!role) {
+                    document.getElementById('register-role').classList.add('border-red-500');
+                    roleError.classList.remove('hidden');
+                    isValid = false;
+                } else {
+                    document.getElementById('register-role').classList.remove('border-red-500');
+                    roleError.classList.add('hidden');
+                }
+                
+                return isValid;
+            }
+            
+            // 登录
+            async login() {
+                // 表单验证
+                if (!this.validateLoginForm()) {
+                    return;
+                }
+                
+                const username = document.getElementById('login-username').value.trim();
+                const password = document.getElementById('login-password').value;
+                const rememberMe = document.getElementById('remember-me').checked;
+                
+                // 查找用户（异步操作）
+                const user = await DataStore.getUserByUsername(username);
+                
+                let passwordValid = false;
+                
+                if (user) {
+                    // 检查是否有盐值（即密码是否已加密）
+                    if (user.salt && window.authService) {
+                        passwordValid = await authService.verifyPassword(password, user.password, user.salt);
+                    } else {
+                        // 兼容旧的明文密码
+                        passwordValid = (user.password === password);
+                        
+                        // 自动升级为加密密码
+                        if (passwordValid && window.authService) {
+                            const salt = authService.generateSalt();
+                            const hashedPassword = await authService.hashPassword(password, salt);
+                            user.password = hashedPassword;
+                            user.salt = salt;
+                            DataStore.updateUser(user);
+                        }
+                    }
+                }
+                
+                if (!passwordValid) {
+                    window.notificationSystem.error('用户名或密码不正确');
+                    return;
+                }
+                
+                // 设置当前用户
+                DataStore.setCurrentUser(user.id);
+                
+                // 显示主页面
+                this.showMainPage();
+            }
+            
+            // 注册
+            async register() {
+                // 表单验证
+                if (!(await this.validateRegisterForm())) {
+                    return;
+                }
+                
+                const username = document.getElementById('register-username').value.trim();
+                const password = document.getElementById('register-password').value;
+                const confirmPassword = document.getElementById('register-confirm-password').value;
+                const name = document.getElementById('register-name').value.trim();
+                const role = document.getElementById('register-role').value;
+                
+                // 设置默认头像
+                let defaultAvatar;
+                switch (role) {
+                    case 'student':
+                        defaultAvatar = 'https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/f13bb2b36f7f4f24b0f53001b7293f54~tplv-a9rns2rl98-image.image?rcl=202511231254528EA2913FE4D8DECDB6BA&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1766465737&x-signature=hO5pm4egQgR7Rc2mqJpKApiovws%3D';
+                        break;
+                    case 'teacher':
+                        defaultAvatar = 'https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/51adbb390f5c4236b836ae8de7b112bc~tplv-a9rns2rl98-image.image?rcl=202511231254528EA2913FE4D8DECDB6BA&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1766465737&x-signature=JkssMmumM3ty2sQXdSisaiWZVmw%3D';
+                        break;
+                    case 'parent':
+                        defaultAvatar = 'https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/2a653d0e42c2496bb2411b5299720b37~tplv-a9rns2rl98-image.image?rcl=202511231254528EA2913FE4D8DECDB6BA&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1766465737&x-signature=YljsuQ5dZC42jjCPtShICfe2jLI%3D';
+                        break;
+                    default:
+                        defaultAvatar = 'https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/f13bb2b36f7f4f24b0f53001b7293f54~tplv-a9rns2rl98-image.image?rcl=202511231254528EA2913FE4D8DECDB6BA&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1766465737&x-signature=hO5pm4egQgR7Rc2mqJpKApiovws%3D';
+                }
+                
+                // 创建用户数据
+                let userData = {
+                    username,
+                    name,
+                    role,
+                    avatar: `yhtx/${username}_default.png`,
+                    avatarData: null,
+                    bio: ''
+                };
+                
+                // 加密密码
+                if (window.authService) {
+                    const salt = authService.generateSalt();
+                    userData.password = await authService.hashPassword(password, salt);
+                    userData.salt = salt;
+                } else {
+                    userData.password = password; // 降级方案
+                }
+                
+                // 创建用户
+                const user = DataStore.addUser(userData);
+                
+                if (user) {
+                    // 显示登录表单
+                    document.getElementById('login-form').classList.remove('hidden');
+                    document.getElementById('register-form').classList.add('hidden');
+                    
+                    // 清空注册表单
+                    document.getElementById('register-username').value = '';
+                    document.getElementById('register-password').value = '';
+                    document.getElementById('register-confirm-password').value = '';
+                    document.getElementById('register-name').value = '';
+                    document.getElementById('register-role').value = '';
+                    
+                    // 显示提示
+                    window.notificationSystem.success('注册成功，请登录');
+                }
+            }
+            
+            // 退出登录
+            logout() {
+                // 清除当前用户
+                DataStore.clearCurrentUser();
+                
+                // 显示登录页面
+                this.showAuthPage();
+            }
+            
+            // 绑定事件
+            bindEvents() {
+                // 登录表单切换
+                document.getElementById('show-register').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById('login-form').classList.add('hidden');
+                    document.getElementById('register-form').classList.remove('hidden');
+                });
+                
+                // 登录表单实时验证
+                document.getElementById('login-username').addEventListener('input', () => {
+                    const username = document.getElementById('login-username').value.trim();
+                    const usernameError = document.getElementById('login-username-error');
+                    if (username) {
+                        document.getElementById('login-username').classList.remove('border-red-500');
+                        usernameError.classList.add('hidden');
+                    }
+                });
+                
+                document.getElementById('login-password').addEventListener('input', () => {
+                    const password = document.getElementById('login-password').value;
+                    const passwordError = document.getElementById('login-password-error');
+                    if (password) {
+                        document.getElementById('login-password').classList.remove('border-red-500');
+                        passwordError.classList.add('hidden');
+                    }
+                });
+                
+                // 注册表单实时验证
+                document.getElementById('register-username').addEventListener('input', async () => {
+                    const username = document.getElementById('register-username').value.trim();
+                    const usernameError = document.getElementById('register-username-error');
+                    if (username) {
+                        // 检查用户名是否已存在
+                        const existingUser = await DataStore.getUserByUsername(username);
+                        if (existingUser) {
+                            document.getElementById('register-username').classList.add('border-red-500');
+                            usernameError.textContent = '用户名已存在';
+                            usernameError.classList.remove('hidden');
+                        } else {
+                            document.getElementById('register-username').classList.remove('border-red-500');
+                            usernameError.classList.add('hidden');
+                        }
+                    } else {
+                        document.getElementById('register-username').classList.remove('border-red-500');
+                        usernameError.classList.add('hidden');
+                    }
+                });
+                
+                document.getElementById('register-password').addEventListener('input', () => {
+                    const password = document.getElementById('register-password').value;
+                    this.validatePasswordStrength(password);
+                });
+                
+                document.getElementById('register-confirm-password').addEventListener('input', () => {
+                    const password = document.getElementById('register-password').value;
+                    const confirmPassword = document.getElementById('register-confirm-password').value;
+                    const confirmPasswordError = document.getElementById('register-confirm-password-error');
+                    if (password === confirmPassword) {
+                        document.getElementById('register-confirm-password').classList.remove('border-red-500');
+                        confirmPasswordError.classList.add('hidden');
+                    }
+                });
+                
+                document.getElementById('register-name').addEventListener('input', () => {
+                    const name = document.getElementById('register-name').value.trim();
+                    const nameError = document.getElementById('register-name-error');
+                    if (name) {
+                        document.getElementById('register-name').classList.remove('border-red-500');
+                        nameError.classList.add('hidden');
+                    }
+                });
+                
+                document.getElementById('register-role').addEventListener('change', () => {
+                    const role = document.getElementById('register-role').value;
+                    const roleError = document.getElementById('register-role-error');
+                    if (role) {
+                        document.getElementById('register-role').classList.remove('border-red-500');
+                        roleError.classList.add('hidden');
+                    }
+                });
+                
+                document.getElementById('show-login').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById('login-form').classList.remove('hidden');
+                    document.getElementById('register-form').classList.add('hidden');
+                });
+                
+                // 登录按钮
+                document.getElementById('login-button').addEventListener('click', () => {
+                    this.login();
+                });
+                
+                // 表单提交时也触发登录/注册
+                document.getElementById('login-form')?.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.login();
+                });
+                
+                document.getElementById('register-form')?.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.register();
+                });
+                
+                // 注册按钮
+                document.getElementById('register-button').addEventListener('click', () => {
+                    this.register();
+                });
+                
+                // 用户菜单
+                const userMenuButton = document.getElementById('user-menu-button');
+                const userDropdown = document.getElementById('user-dropdown');
+                const userMenu = document.getElementById('user-menu');
+                
+                if (userMenuButton && userDropdown) {
+                    userMenuButton.addEventListener('click', () => {
+                        userDropdown.classList.toggle('hidden');
+                    });
+                }
+                
+                // 点击页面其他地方关闭用户菜单
+                if (userMenu && userDropdown) {
+                    document.addEventListener('click', (e) => {
+                        if (!userMenu.contains(e.target)) {
+                            userDropdown.classList.add('hidden');
+                        }
+                    });
+                }
+                
+                // 移动端菜单
+                const mobileMenuButton = document.getElementById('mobile-menu-button');
+                const mobileMenu = document.getElementById('mobile-menu');
+                
+                if (mobileMenuButton && mobileMenu) {
+                    mobileMenuButton.addEventListener('click', () => {
+                        mobileMenu.classList.toggle('hidden');
+                    });
+                }
+                
+                // 导航链接
+                document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const target = link.dataset.target;
+                        if (target) {
+                            this.showSection(target);
+                            
+                            // 关闭移动端菜单
+                            document.getElementById('mobile-menu').classList.add('hidden');
+                        }
+                    });
+                });
+                
+                // 个人资料链接
+                const profileLink = document.getElementById('profile-link');
+                if (profileLink) {
+                    profileLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        alert('个人资料功能正在开发中');
+                    });
+                }
+                
+                // 设置链接
+                const settingsLink = document.getElementById('settings-link');
+                if (settingsLink && userDropdown) {
+                    settingsLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.showSection('settings-section');
+                        userDropdown.classList.add('hidden');
+                    });
+                }
+                
+                // 退出登录链接
+                const logoutLink = document.getElementById('logout-link');
+                if (logoutLink) {
+                    logoutLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.logout();
+                    });
+                }
+                
+                // 发布动态按钮
+                const postButton = document.getElementById('post-button');
+                if (postButton) {
+                    postButton.addEventListener('click', () => {
+                        this.postContent();
+                    });
+                }
+                
+                // 发送消息按钮
+                const sendMessageButton = document.getElementById('send-message');
+                if (sendMessageButton) {
+                    sendMessageButton.addEventListener('click', () => {
+                        this.sendMessage();
+                    });
+                }
+                
+                // 消息输入框回车发送
+                const messageInput = document.getElementById('message-input');
+                if (messageInput) {
+                    messageInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            this.sendMessage();
+                        }
+                    });
+                }
+                
+                // 文件上传按钮
+                const uploadButton = document.getElementById('upload-button');
+                const fileUpload = document.getElementById('file-upload');
+                const submitUpload = document.getElementById('submit-upload');
+                
+                if (uploadButton && fileUpload) {
+                    uploadButton.addEventListener('click', () => {
+                        fileUpload.click();
+                    });
+                }
+                
+                // 文件选择变化
+                if (fileUpload) {
+                    fileUpload.addEventListener('change', (e) => {
+                        this.handleFileUpload(e.target.files);
+                    });
+                }
+                
+                // 提交文件上传按钮
+                if (submitUpload) {
+                    submitUpload.addEventListener('click', () => {
+                        this.submitFileUpload();
+                    });
+                }
+                
+                // 头像上传按钮
+                const avatarPreview = document.getElementById('avatar-preview');
+                if (avatarPreview && avatarPreview.parentElement) {
+                    const avatarUploadDiv = avatarPreview.parentElement.querySelector('div');
+                    if (avatarUploadDiv) {
+                        avatarUploadDiv.addEventListener('click', () => {
+                            const avatarUpload = document.getElementById('avatar-upload');
+                            if (avatarUpload) {
+                                avatarUpload.click();
+                            }
+                        });
+                    }
+                }
+                
+                // 头像选择变化
+                const avatarUpload = document.getElementById('avatar-upload');
+                if (avatarUpload) {
+                    avatarUpload.addEventListener('change', (e) => {
+                        if (e.target.files && e.target.files[0]) {
+                            this.updateAvatar(e.target.files[0]);
+                        }
+                    });
+                }
+                
+                // 保存头像按钮
+                const saveAvatarButton = document.getElementById('save-avatar');
+                if (saveAvatarButton && avatarUpload) {
+                    saveAvatarButton.addEventListener('click', () => {
+                        avatarUpload.click();
+                    });
+                }
+                
+                // 保存个人信息按钮
+                const saveInfoButton = document.getElementById('save-info');
+                if (saveInfoButton) {
+                    saveInfoButton.addEventListener('click', () => {
+                        this.updateProfile();
+                    });
+                }
+                
+                // 修改密码按钮
+                const changePasswordButton = document.getElementById('change-password');
+                if (changePasswordButton) {
+                    changePasswordButton.addEventListener('click', () => {
+                        this.changePassword();
+                    });
+                }
+                
+                // 忘记密码链接
+                const forgotPasswordLink = document.getElementById('forgot-password');
+                if (forgotPasswordLink) {
+                    forgotPasswordLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        alert('请联系管理员重置密码');
+                    });
+                }
+            }
+        }
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', () => {
+            const app = new WangpuCommunityApp();
+        });
+    </script>
+</body>
+</html>

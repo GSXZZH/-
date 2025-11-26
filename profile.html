@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>王朴中学社区 - 个人资料</title>
+    <!-- Tailwind CSS v3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 统一的 Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#dc2626',
+                        secondary: '#f87171',
+                        dark: '#b91c1c',
+                        light: '#fef2f2',
+                        gray: '#f3f4f6'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .transition-smooth {
+                transition: all 0.3s ease;
+            }
+            .shadow-custom {
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray min-h-screen flex flex-col">
+    <!-- 顶部导航栏 -->
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <img src="wpzxxh.png" alt="王朴中学校徽" class="h-12">
+                <h1 class="text-xl font-bold text-primary">王朴中学社区</h1>
+            </div>
+            <nav class="hidden md:flex space-x-6">
+                <a href="home.html" class="nav-link text-gray-700 hover:text-primary transition-smooth">首页</a>
+                <a href="chat.html" class="nav-link text-gray-700 hover:text-primary transition-smooth">聊天</a>
+                <a href="resources.html" class="nav-link text-gray-700 hover:text-primary transition-smooth">资源</a>
+                <a href="vote.html" class="nav-link text-gray-700 hover:text-primary transition-smooth">投票系统</a>
+            </nav>
+            <div class="flex items-center space-x-4">
+                <div class="relative" id="user-menu">
+                    <button type="button" id="user-menu-button" class="flex items-center space-x-2 focus:outline-none">
+                        <img id="user-avatar" src="wpzxxh.png" alt="用户头像" class="h-8 w-8 rounded-full object-cover">
+                        <span id="user-name" class="text-sm font-medium text-gray-700">用户名</span>
+                        <i class="fa fa-chevron-down text-xs text-gray-500"></i>
+                    </button>
+                    <div id="user-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 hidden">
+                        <a href="profile.html" class="block px-4 py-2 text-sm text-primary font-medium hover:bg-gray">个人资料</a>
+                        <a href="settings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray">设置</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray" id="logout-link">退出登录</a>
+                    </div>
+                </div>
+                <button type="button" id="mobile-menu-button" class="md:hidden focus:outline-none">
+                    <i class="fa fa-bars text-gray-700 text-xl"></i>
+                </button>
+            </div>
+        </div>
+        <!-- 移动端菜单 -->
+        <div id="mobile-menu" class="md:hidden bg-white shadow-sm hidden">
+            <div class="container mx-auto px-4 py-2">
+                <a href="home.html" class="mobile-nav-link block py-2 text-gray-700 hover:text-primary transition-smooth">首页</a>
+                <a href="chat.html" class="mobile-nav-link block py-2 text-gray-700 hover:text-primary transition-smooth">聊天</a>
+                <a href="resources.html" class="mobile-nav-link block py-2 text-gray-700 hover:text-primary transition-smooth">资源</a>
+                <a href="vote.html" class="mobile-nav-link block py-2 text-gray-700 hover:text-primary transition-smooth">投票系统</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要内容区域 -->
+    <main class="flex-grow container mx-auto px-4 py-6">
+        <!-- 个人资料页面 -->
+        <section id="profile-section">
+            <div class="bg-white rounded-lg shadow-custom p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-6">个人资料</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- 个人基本信息 -->
+                    <div class="md:col-span-1">
+                        <div class="bg-light rounded-lg p-6 text-center">
+                            <h4 class="font-medium text-gray-700 mb-4">基本信息</h4>
+                            
+                            <!-- 头像 -->
+                            <div class="relative inline-block mb-4">
+                                <img id="profile-avatar" src="wpzxxh.png" alt="用户头像" class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-sm">
+                                <div class="absolute bottom-0 right-0 bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center cursor-pointer hover:bg-dark transition-smooth">
+                                    <i class="fa fa-camera"></i>
+                                </div>
+                                <input type="file" id="avatar-upload" class="hidden" accept="image/*">
+                            </div>
+                            
+                            <h3 id="profile-name" class="text-lg font-semibold text-gray-800 mb-1">用户名</h3>
+                            <p id="profile-username" class="text-sm text-gray-500 mb-2">@username</p>
+                            <p id="profile-role" class="text-sm text-primary font-medium">学生</p>
+                            
+                            <div class="mt-4 flex justify-center">
+                                <button id="edit-profile-btn" class="bg-primary text-white py-2 px-4 rounded-md hover:bg-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-smooth">
+                                    编辑资料
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 详细资料 -->
+                    <div class="md:col-span-2">
+                        <div class="bg-white rounded-lg shadow-sm p-6">
+                            <div id="profile-view" class="space-y-4">
+                                <div>
+                                    <h4 class="text-base font-medium text-gray-700 mb-2">个人简介</h4>
+                                    <p id="profile-bio" class="text-gray-600">暂无简介</p>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <h4 class="text-base font-medium text-gray-700 mb-2">注册时间</h4>
+                                        <p id="profile-registration-date" class="text-gray-600">2024-01-01</p>
+                                    </div>
+                                    
+                                    <div>
+                                        <h4 class="text-base font-medium text-gray-700 mb-2">最后登录</h4>
+                                        <p id="profile-last-login" class="text-gray-600">2024-01-01 00:00:00</p>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h4 class="text-base font-medium text-gray-700 mb-2">发布动态</h4>
+                                    <div id="user-posts" class="space-y-3">
+                                        <p class="text-gray-500 text-center italic">暂无动态</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 编辑资料表单 -->
+                            <div id="profile-edit" class="space-y-4 hidden">
+                                <div>
+                                    <label for="edit-name" class="block text-sm font-medium text-gray-700 mb-1">真实姓名</label>
+                                    <input type="text" id="edit-name" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="请输入真实姓名">
+                                </div>
+                                
+                                <div>
+                                    <label for="edit-bio" class="block text-sm font-medium text-gray-700 mb-1">个人简介</label>
+                                    <textarea id="edit-bio" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="介绍一下自己吧..."></textarea>
+                                </div>
+                                
+                                <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                                    <button id="cancel-edit-btn" class="border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-smooth">
+                                        取消
+                                    </button>
+                                    <button id="save-profile-btn" class="bg-primary text-white py-2 px-4 rounded-md hover:bg-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-smooth">
+                                        保存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-white border-t border-gray-200 py-4">
+        <div class="container mx-auto px-4 text-center text-gray-600 text-sm">
+            <p>© 2025 王朴中学社区. 保留所有权利.</p>
+        </div>
+    </footer>
+
+    <!-- 引入数据存储模块 -->
+    <script src="dataStore.js"></script>
+    <script src="auth.js"></script>
+    <script src="notification.js"></script>
+    <script>
+        // 确保DataStore初始化的辅助函数
+        async function ensureDataStoreInitialized() {
+            if (!window.DataStore || !window.DataStore.initialized) {
+                // 等待DataStore初始化完成
+                while (!window.DataStore || !window.DataStore.initialized) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+            }
+            return window.DataStore;
+        }
+
+        // 工具函数
+        const Utils = {
+            // 格式化日期时间
+            formatDateTime(timestamp) {
+                const date = new Date(timestamp);
+                return date.toLocaleString('zh-CN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            },
+            
+            // 格式化日期
+            formatDate(timestamp) {
+                const date = new Date(timestamp);
+                return date.toLocaleDateString('zh-CN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                });
+            }
+        };
+
+        // 应用主类
+        class ProfileApp {
+            constructor() {
+                this.newAvatar = null;
+                this.init();
+            }
+            
+            // 初始化应用
+            async init() {
+                // 确保DataStore初始化完成
+                await ensureDataStoreInitialized();
+                
+                // 检查用户是否已登录
+                await this.checkLoginStatus();
+                
+                // 更新用户信息
+                this.updateUserInfo();
+                
+                // 加载个人资料
+                this.loadProfile();
+                
+                // 绑定事件
+                this.bindEvents();
+            }
+            
+            // 检查登录状态
+            async checkLoginStatus() {
+                const currentUser = DataStore.getCurrentUser();
+                if (!currentUser) {
+                    // 用户未登录，跳转到登录页面
+                    window.location.href = 'index.html';
+                }
+            }
+            
+            // 更新用户信息
+            updateUserInfo() {
+                const currentUser = DataStore.getCurrentUser();
+                if (currentUser) {
+                    // 优先使用avatarData（base64数据）进行预览，如果没有则使用avatar路径
+                    const avatarSrc = currentUser.avatarData || currentUser.avatar;
+                    document.getElementById('user-avatar').src = avatarSrc;
+                    document.getElementById('user-name').textContent = currentUser.name;
+                }
+            }
+            
+            // 加载个人资料
+            loadProfile() {
+                const currentUser = DataStore.getCurrentUser();
+                if (!currentUser) return;
+                
+                // 加载基本信息
+                const avatarSrc = currentUser.avatarData || currentUser.avatar;
+                document.getElementById('profile-avatar').src = avatarSrc;
+                document.getElementById('profile-name').textContent = currentUser.name;
+                document.getElementById('profile-username').textContent = '@' + currentUser.username;
+                document.getElementById('profile-role').textContent = currentUser.role || '学生';
+                document.getElementById('profile-bio').textContent = currentUser.bio || '暂无简介';
+                
+                // 加载时间信息
+                const registrationDate = currentUser.registrationDate || new Date().toISOString();
+                document.getElementById('profile-registration-date').textContent = Utils.formatDate(registrationDate);
+                
+                const lastLogin = currentUser.lastLogin || new Date().toISOString();
+                document.getElementById('profile-last-login').textContent = Utils.formatDateTime(lastLogin);
+                
+                // 加载用户发布的动态
+                this.loadUserPosts();
+                
+                // 为编辑表单设置初始值
+                document.getElementById('edit-name').value = currentUser.name;
+                document.getElementById('edit-bio').value = currentUser.bio || '';
+            }
+            
+            // 加载用户发布的动态
+            loadUserPosts() {
+                const currentUser = DataStore.getCurrentUser();
+                const posts = DataStore.getPosts();
+                const userPosts = posts.filter(post => post.authorId === currentUser.id);
+                
+                const postsContainer = document.getElementById('user-posts');
+                
+                if (userPosts.length === 0) {
+                    postsContainer.innerHTML = '<p class="text-gray-500 text-center italic">暂无动态</p>';
+                    return;
+                }
+                
+                postsContainer.innerHTML = '';
+                userPosts.forEach(post => {
+                    const postElement = document.createElement('div');
+                    postElement.className = 'bg-gray p-3 rounded-md';
+                    postElement.innerHTML = `
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-gray-700">${post.content}</span>
+                        </div>
+                        <p class="text-xs text-gray-500 text-right">${Utils.formatDateTime(post.createdAt)}</p>
+                    `;
+                    postsContainer.appendChild(postElement);
+                });
+            }
+            
+            // 切换到编辑模式
+            switchToEditMode() {
+                document.getElementById('profile-view').classList.add('hidden');
+                document.getElementById('profile-edit').classList.remove('hidden');
+            }
+            
+            // 切换到查看模式
+            switchToViewMode() {
+                document.getElementById('profile-view').classList.remove('hidden');
+                document.getElementById('profile-edit').classList.add('hidden');
+            }
+            
+            // 处理头像上传
+            handleAvatarUpload(file) {
+                if (!file) return;
+                
+                // 检查文件类型
+                if (!file.type.match('image.*')) {
+                    window.notificationSystem.error('请选择图片文件');
+                    return;
+                }
+                
+                // 创建文件读取器
+                const reader = new FileReader();
+                
+                reader.onload = (e) => {
+                    // 更新头像预览
+                    document.getElementById('profile-avatar').src = e.target.result;
+                    this.newAvatar = e.target.result;
+                };
+                
+                reader.readAsDataURL(file);
+            }
+            
+            // 保存个人资料
+            saveProfile() {
+                const currentUser = DataStore.getCurrentUser();
+                if (!currentUser) return;
+                
+                // 获取表单数据
+                const name = document.getElementById('edit-name').value.trim();
+                const bio = document.getElementById('edit-bio').value.trim();
+                
+                // 验证姓名
+                if (!name) {
+                    window.notificationSystem.error('请输入真实姓名');
+                    return;
+                }
+                
+                // 更新用户信息
+                const updatedUser = {
+                    ...currentUser,
+                    name,
+                    bio
+                };
+                
+                // 如果有新头像，更新头像
+                if (this.newAvatar) {
+                    updatedUser.avatar = this.newAvatar;
+                    updatedUser.avatarData = this.newAvatar; // 保存base64数据用于预览
+                }
+                
+                // 更新用户信息
+                if (DataStore.updateUser(updatedUser)) {
+                    // 更新导航栏信息
+                    document.getElementById('user-name').textContent = name;
+                    if (this.newAvatar) {
+                        document.getElementById('user-avatar').src = this.newAvatar;
+                    }
+                    
+                    // 切换回查看模式并重新加载资料
+                    this.switchToViewMode();
+                    this.loadProfile();
+                    
+                    // 显示成功提示
+                    window.notificationSystem.success('个人资料保存成功');
+                } else {
+                    window.notificationSystem.error('保存失败，请重试');
+                }
+            }
+            
+            // 退出登录
+            logout() {
+                // 清除当前用户
+                DataStore.clearCurrentUser();
+                
+                // 跳转到登录页面
+                window.location.href = 'index.html';
+            }
+            
+            // 绑定事件
+            bindEvents() {
+                // 用户菜单
+                document.getElementById('user-menu-button').addEventListener('click', () => {
+                    document.getElementById('user-dropdown').classList.toggle('hidden');
+                });
+                
+                // 点击页面其他地方关闭用户菜单
+                document.addEventListener('click', (e) => {
+                    const userMenu = document.getElementById('user-menu');
+                    if (!userMenu.contains(e.target)) {
+                        document.getElementById('user-dropdown').classList.add('hidden');
+                    }
+                });
+                
+                // 移动端菜单
+                document.getElementById('mobile-menu-button').addEventListener('click', () => {
+                    document.getElementById('mobile-menu').classList.toggle('hidden');
+                });
+                
+                // 编辑资料按钮
+                document.getElementById('edit-profile-btn').addEventListener('click', () => {
+                    this.switchToEditMode();
+                });
+                
+                // 取消编辑按钮
+                document.getElementById('cancel-edit-btn').addEventListener('click', () => {
+                    this.switchToViewMode();
+                });
+                
+                // 保存资料按钮
+                document.getElementById('save-profile-btn').addEventListener('click', () => {
+                    this.saveProfile();
+                });
+                
+                // 头像上传
+                document.getElementById('profile-avatar').nextElementSibling.addEventListener('click', () => {
+                    document.getElementById('avatar-upload').click();
+                });
+                
+                // 头像选择变化
+                document.getElementById('avatar-upload').addEventListener('change', (e) => {
+                    this.handleAvatarUpload(e.target.files[0]);
+                });
+                
+                // 退出登录链接
+                document.getElementById('logout-link').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.logout();
+                });
+            }
+        }
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', () => {
+            const app = new ProfileApp();
+        });
+    </script>
+</body>
+</html>

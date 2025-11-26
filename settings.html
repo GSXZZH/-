@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>王朴中学社区 - 个人设置</title>
+    <!-- Tailwind CSS v3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 统一的 Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#dc2626',
+                        secondary: '#f87171',
+                        dark: '#b91c1c',
+                        light: '#fef2f2',
+                        gray: '#f3f4f6'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .transition-smooth {
+                transition: all 0.3s ease;
+            }
+            .shadow-custom {
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray min-h-screen flex flex-col">
+    <!-- 顶部导航栏 -->
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <img src="wpzxxh.png" alt="王朴中学校徽" class="h-12">
+                <h1 class="text-xl font-bold text-primary">王朴中学社区</h1>
+            </div>
+            <nav class="hidden md:flex space-x-6">
+                <a href="home.html" class="nav-link text-gray-700 hover:text-primary transition-smooth">首页</a>
+                <a href="chat.html" class="nav-link text-gray-700 hover:text-primary transition-smooth">聊天</a>
+                <a href="resources.html" class="nav-link text-gray-700 hover:text-primary transition-smooth">资源</a>
+                <a href="vote.html" class="nav-link text-gray-700 hover:text-primary transition-smooth">投票系统</a>
+            </nav>
+            <div class="flex items-center space-x-4">
+                <div class="relative" id="user-menu">
+                    <button type="button" id="user-menu-button" class="flex items-center space-x-2 focus:outline-none">
+                        <img id="user-avatar" src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/f13bb2b36f7f4f24b0f53001b7293f54~tplv-a9rns2rl98-image.image?rcl=202511231254528EA2913FE4D8DECDB6BA&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1766465737&x-signature=hO5pm4egQgR7Rc2mqJpKApiovws%3D" alt="用户头像" class="h-8 w-8 rounded-full object-cover">
+                        <span id="user-name" class="text-sm font-medium text-gray-700">用户名</span>
+                        <i class="fa fa-chevron-down text-xs text-gray-500"></i>
+                    </button>
+                    <div id="user-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 hidden">
+                        <a href="profile.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray" id="profile-link">个人资料</a>
+                        <a href="settings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray font-medium">设置</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray" id="logout-link">退出登录</a>
+                    </div>
+                </div>
+                <button type="button" id="mobile-menu-button" class="md:hidden focus:outline-none">
+                    <i class="fa fa-bars text-gray-700 text-xl"></i>
+                </button>
+            </div>
+        </div>
+        <!-- 移动端菜单 -->
+        <div id="mobile-menu" class="md:hidden bg-white shadow-sm hidden">
+            <div class="container mx-auto px-4 py-2">
+                <a href="home.html" class="mobile-nav-link block py-2 text-gray-700 hover:text-primary transition-smooth">首页</a>
+                <a href="chat.html" class="mobile-nav-link block py-2 text-gray-700 hover:text-primary transition-smooth">聊天</a>
+                <a href="resources.html" class="mobile-nav-link block py-2 text-gray-700 hover:text-primary transition-smooth">资源</a>
+                <a href="vote.html" class="mobile-nav-link block py-2 text-gray-700 hover:text-primary transition-smooth">投票系统</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要内容区域 -->
+    <main class="flex-grow container mx-auto px-4 py-6">
+        <!-- 个人设置页面 -->
+        <section id="settings-section">
+            <div class="bg-white rounded-lg shadow-custom p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-6">个人设置</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- 头像设置 -->
+                    <div class="md:col-span-1">
+                        <div class="bg-light rounded-lg p-6 text-center">
+                            <h4 class="font-medium text-gray-700 mb-4">头像设置</h4>
+                            <div class="relative inline-block mb-4">
+                                <img id="avatar-preview" src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/f13bb2b36f7f4f24b0f53001b7293f54~tplv-a9rns2rl98-image.image?rcl=202511231254528EA2913FE4D8DECDB6BA&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1766465737&x-signature=hO5pm4egQgR7Rc2mqJpKApiovws%3D" alt="用户头像" class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-sm">
+                                <div class="absolute bottom-0 right-0 bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center cursor-pointer hover:bg-dark transition-smooth">
+                                    <i class="fa fa-camera"></i>
+                                </div>
+                                <input type="file" id="avatar-upload" class="hidden" accept="image/*">
+                            </div>
+                            <p class="text-sm text-gray-500 mb-4">支持 JPG、PNG 格式，建议尺寸 200x200px</p>
+                            <button id="save-avatar" class="bg-primary text-white py-2 px-4 rounded-md hover:bg-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-smooth">保存头像</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 个人信息设置 -->
+                    <div class="md:col-span-2">
+                        <div class="bg-light rounded-lg p-6">
+                            <h4 class="font-medium text-gray-700 mb-4">个人信息</h4>
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="settings-username" class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
+                                        <input type="text" id="settings-username" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" disabled>
+                                    </div>
+                                    <div class="relative">
+                                        <label for="settings-name" class="block text-sm font-medium text-gray-700 mb-1">真实姓名</label>
+                                        <input type="text" id="settings-name" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                        <div id="settings-name-error" class="absolute -bottom-5 left-0 text-xs text-red-500 hidden">姓名不能为空</div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="settings-role" class="block text-sm font-medium text-gray-700 mb-1">身份</label>
+                                    <select id="settings-role" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" disabled>
+                                        <option value="student">学生</option>
+                                        <option value="teacher">教师</option>
+                                        <option value="parent">家长</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="settings-bio" class="block text-sm font-medium text-gray-700 mb-1">个人简介</label>
+                                    <textarea id="settings-bio" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" rows="3"></textarea>
+                                </div>
+                                <div class="pt-4 border-t border-gray-200">
+                                    <button id="save-info" class="bg-primary text-white py-2 px-4 rounded-md hover:bg-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-smooth">保存信息</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 密码修改 -->
+                        <div class="bg-light rounded-lg p-6 mt-6">
+                            <h4 class="font-medium text-gray-700 mb-4">修改密码</h4>
+                            <div class="space-y-4">
+                                <div class="relative">
+                                    <label for="current-password" class="block text-sm font-medium text-gray-700 mb-1">当前密码</label>
+                                    <input type="password" id="current-password" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="请输入当前密码">
+                                    <div id="current-password-error" class="absolute -bottom-5 left-0 text-xs text-red-500 hidden">当前密码不能为空</div>
+                                </div>
+                                <div class="relative">
+                                    <label for="new-password" class="block text-sm font-medium text-gray-700 mb-1">新密码</label>
+                                    <input type="password" id="new-password" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="请输入新密码">
+                                    <div id="new-password-error" class="absolute -bottom-5 left-0 text-xs text-red-500 hidden">新密码长度不能少于6位</div>
+                                    <div id="new-password-strength" class="absolute -bottom-5 left-0 text-xs text-gray-500 hidden">
+                                        <span id="new-password-strength-text">密码强度：</span>
+                                        <span id="new-password-strength-bar" class="inline-block w-16 h-2 bg-gray rounded-full ml-1"></span>
+                                    </div>
+                                </div>
+                                <div class="relative">
+                                    <label for="confirm-password" class="block text-sm font-medium text-gray-700 mb-1">确认新密码</label>
+                                    <input type="password" id="confirm-password" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="请再次输入新密码">
+                                    <div id="confirm-password-error" class="absolute -bottom-5 left-0 text-xs text-red-500 hidden">两次输入的密码不一致</div>
+                                </div>
+                                <div class="pt-4 border-t border-gray-200">
+                                    <button id="change-password" class="bg-primary text-white py-2 px-4 rounded-md hover:bg-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-smooth">修改密码</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-white border-t border-gray-200 py-4">
+        <div class="container mx-auto px-4 text-center text-gray-600 text-sm">
+            <p>© 2025 王朴中学社区. 保留所有权利.</p>
+        </div>
+    </footer>
+
+    <!-- 引入数据存储模块 -->
+    <script src="dataStore.js"></script>
+    <script src="auth.js"></script>
+    <script src="notification.js"></script>
+    <script>
+        // 确保DataStore初始化的辅助函数
+        async function ensureDataStoreInitialized() {
+            if (!window.DataStore || !window.DataStore.initialized) {
+                // 等待DataStore初始化完成
+                while (!window.DataStore || !window.DataStore.initialized) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+            }
+            return window.DataStore;
+        }
+
+        // 应用主类
+        class WangpuCommunityApp {
+            constructor() {
+                this.newAvatar = null;
+                this.init();
+            }
+            
+            // 初始化应用
+            async init() {
+                // 确保DataStore初始化完成
+                await ensureDataStoreInitialized();
+                
+                // 如果有持久化存储，先从IndexedDB加载数据到localStorage
+                if (window.persistentStorage) {
+                    try {
+                        await persistentStorage.initDB();
+                        await persistentStorage.loadDBToLocalStorage();
+                        console.log('已从持久化存储加载数据');
+                    } catch (error) {
+                        console.warn('从持久化存储加载数据失败:', error);
+                    }
+                }
+                
+                // 检查用户是否已登录
+                await this.checkLoginStatus();
+                
+                // 更新用户信息
+                this.updateUserInfo();
+                
+                // 加载个人设置
+                this.loadUserSettings();
+                
+                // 绑定事件
+                this.bindEvents();
+            }
+            
+            // 检查登录状态
+            async checkLoginStatus() {
+                const currentUser = DataStore.getCurrentUser();
+                if (!currentUser) {
+                    // 用户未登录，跳转到登录页面
+                    window.location.href = 'index.html';
+                }
+            }
+            
+            // 更新用户信息
+            updateUserInfo() {
+                const currentUser = DataStore.getCurrentUser();
+                if (currentUser) {
+                    // 优先使用avatarData（base64数据）进行预览，如果没有则使用avatar路径
+                    const avatarSrc = currentUser.avatarData || currentUser.avatar;
+                    document.getElementById('user-avatar').src = avatarSrc;
+                    document.getElementById('user-name').textContent = currentUser.name;
+                }
+            }
+            
+            // 加载个人设置
+            loadUserSettings() {
+                const currentUser = DataStore.getCurrentUser();
+                if (!currentUser) return;
+                
+                // 加载用户信息
+                document.getElementById('settings-username').value = currentUser.username;
+                document.getElementById('settings-name').value = currentUser.name;
+                document.getElementById('settings-role').value = currentUser.role;
+                document.getElementById('settings-bio').value = currentUser.bio || '';
+                
+                // 加载头像，优先使用avatarData（base64数据）进行预览，如果没有则使用avatar路径
+                const avatarSrc = currentUser.avatarData || currentUser.avatar;
+                document.getElementById('avatar-preview').src = avatarSrc;
+            }
+            
+            // 处理头像上传
+            handleAvatarUpload(file) {
+                if (!file) return;
+                
+                // 检查文件类型
+                if (!file.type.match('image.*')) {
+                    window.notificationSystem.error('请选择图片文件');
+                    return;
+                }
+                
+                // 创建文件读取器
+                const reader = new FileReader();
+                
+                reader.onload = (e) => {
+                    // 更新头像预览
+                    document.getElementById('avatar-preview').src = e.target.result;
+                    this.newAvatar = e.target.result;
+                };
+                
+                reader.readAsDataURL(file);
+            }
+            
+            // 保存头像
+            saveAvatar() {
+                if (!this.newAvatar) return;
+                
+                const currentUser = DataStore.getCurrentUser();
+                if (!currentUser) return;
+                
+                // 更新用户头像
+                const updatedUser = {
+                    ...currentUser,
+                    avatar: this.newAvatar
+                };
+                
+                if (DataStore.updateUser(updatedUser)) {
+                    // 更新导航栏头像
+                    document.getElementById('user-avatar').src = this.newAvatar;
+                    
+                    // 显示提示
+                    alert('头像保存成功');
+                }
+            }
+            
+            // 验证个人信息表单
+            validateUserInfoForm() {
+                let isValid = true;
+                
+                // 验证姓名
+                const name = document.getElementById('settings-name').value.trim();
+                const nameError = document.getElementById('settings-name-error');
+                if (!name) {
+                    document.getElementById('settings-name').classList.add('border-red-500');
+                    nameError.classList.remove('hidden');
+                    isValid = false;
+                } else {
+                    document.getElementById('settings-name').classList.remove('border-red-500');
+                    nameError.classList.add('hidden');
+                }
+                
+                return isValid;
+            }
+            
+            // 实时验证密码强度
+            validatePasswordStrength(password) {
+                const strengthText = document.getElementById('new-password-strength-text');
+                const strengthBar = document.getElementById('new-password-strength-bar');
+                
+                let strength = 0;
+                let strengthLabel = '';
+                let barColor = '';
+                
+                if (password.length > 0) {
+                    document.getElementById('new-password-strength').classList.remove('hidden');
+                    document.getElementById('new-password-error').classList.add('hidden');
+                    
+                    // 长度检查
+                    if (password.length >= 6) strength += 1;
+                    if (password.length >= 10) strength += 1;
+                    
+                    // 复杂度检查
+                    if (/[A-Z]/.test(password)) strength += 1;
+                    if (/[a-z]/.test(password)) strength += 1;
+                    if (/[0-9]/.test(password)) strength += 1;
+                    if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+                    
+                    // 计算强度百分比
+                    const percentage = (strength / 6) * 100;
+                    
+                    // 设置强度标签和颜色
+                    if (percentage <= 33) {
+                        strengthLabel = '弱';
+                        barColor = 'bg-red-500';
+                    } else if (percentage <= 66) {
+                        strengthLabel = '中';
+                        barColor = 'bg-yellow-500';
+                    } else {
+                        strengthLabel = '强';
+                        barColor = 'bg-green-500';
+                    }
+                    
+                    // 更新UI
+                    strengthText.textContent = `密码强度：${strengthLabel}`;
+                    strengthBar.className = `inline-block h-2 bg-gray rounded-full ml-1 transition-all duration-300`;
+                    strengthBar.style.width = `${percentage}%`;
+                    strengthBar.classList.add(barColor);
+                } else {
+                    document.getElementById('new-password-strength').classList.add('hidden');
+                }
+                
+                return percentage;
+            }
+            
+            // 验证密码修改表单
+            validatePasswordForm() {
+                let isValid = true;
+                
+                // 验证当前密码
+                const currentPassword = document.getElementById('current-password').value;
+                const currentPasswordError = document.getElementById('current-password-error');
+                if (!currentPassword) {
+                    document.getElementById('current-password').classList.add('border-red-500');
+                    currentPasswordError.classList.remove('hidden');
+                    isValid = false;
+                } else {
+                    document.getElementById('current-password').classList.remove('border-red-500');
+                    currentPasswordError.classList.add('hidden');
+                }
+                
+                // 验证新密码
+                const newPassword = document.getElementById('new-password').value;
+                const newPasswordError = document.getElementById('new-password-error');
+                if (newPassword.length < 6) {
+                    document.getElementById('new-password').classList.add('border-red-500');
+                    newPasswordError.classList.remove('hidden');
+                    isValid = false;
+                } else {
+                    document.getElementById('new-password').classList.remove('border-red-500');
+                    newPasswordError.classList.add('hidden');
+                }
+                
+                // 验证确认密码
+                const confirmPassword = document.getElementById('confirm-password').value;
+                const confirmPasswordError = document.getElementById('confirm-password-error');
+                if (newPassword !== confirmPassword) {
+                    document.getElementById('confirm-password').classList.add('border-red-500');
+                    confirmPasswordError.classList.remove('hidden');
+                    isValid = false;
+                } else {
+                    document.getElementById('confirm-password').classList.remove('border-red-500');
+                    confirmPasswordError.classList.add('hidden');
+                }
+                
+                return isValid;
+            }
+            
+            // 保存个人信息
+            saveUserInfo() {
+                const currentUser = DataStore.getCurrentUser();
+                if (!currentUser) return;
+                
+                // 表单验证
+                if (!this.validateUserInfoForm()) {
+                    return;
+                }
+                
+                const name = document.getElementById('settings-name').value.trim();
+                const bio = document.getElementById('settings-bio').value.trim();
+                
+                // 更新用户信息
+                const updatedUser = {
+                    ...currentUser,
+                    name,
+                    bio
+                };
+                
+                if (DataStore.updateUser(updatedUser)) {
+                    // 更新导航栏用户名
+                    document.getElementById('user-name').textContent = name;
+                    
+                    // 显示提示
+                    alert('个人信息保存成功');
+                }
+            }
+            
+            // 修改密码
+            async changePassword() {
+                const currentUser = DataStore.getCurrentUser();
+                if (!currentUser) return;
+                
+                // 表单验证
+                if (!this.validatePasswordForm()) {
+                    return;
+                }
+                
+                const currentPassword = document.getElementById('current-password').value;
+                const newPassword = document.getElementById('new-password').value;
+                const confirmPassword = document.getElementById('confirm-password').value;
+                
+                // 验证当前密码
+                let currentPasswordValid = false;
+                if (currentUser.salt && window.authService) {
+                    currentPasswordValid = await authService.verifyPassword(currentPassword, currentUser.password, currentUser.salt);
+                } else {
+                    currentPasswordValid = (currentUser.password === currentPassword);
+                }
+                
+                if (!currentPasswordValid) {
+                    document.getElementById('current-password').classList.add('border-red-500');
+                    document.getElementById('current-password-error').textContent = '当前密码不正确';
+                    document.getElementById('current-password-error').classList.remove('hidden');
+                    return;
+                }
+                
+                // 更新用户密码
+                const updatedUser = {
+                    ...currentUser
+                };
+                
+                // 加密新密码
+                if (window.authService) {
+                    const salt = authService.generateSalt();
+                    updatedUser.password = await authService.hashPassword(newPassword, salt);
+                    updatedUser.salt = salt;
+                } else {
+                    updatedUser.password = newPassword;
+                }
+                
+                if (DataStore.updateUser(updatedUser)) {
+                    // 清空密码输入框
+                    document.getElementById('current-password').value = '';
+                    document.getElementById('new-password').value = '';
+                    document.getElementById('confirm-password').value = '';
+                    
+                    // 显示提示
+                    alert('密码修改成功');
+                }
+            }
+            
+            // 退出登录
+            logout() {
+                // 清除当前用户
+                DataStore.clearCurrentUser();
+                
+                // 跳转到登录页面
+                window.location.href = 'index.html';
+            }
+            
+            // 绑定事件
+            bindEvents() {
+                // 用户菜单
+                document.getElementById('user-menu-button').addEventListener('click', () => {
+                    document.getElementById('user-dropdown').classList.toggle('hidden');
+                });
+                
+                // 点击页面其他地方关闭用户菜单
+                document.addEventListener('click', (e) => {
+                    const userMenu = document.getElementById('user-menu');
+                    if (!userMenu.contains(e.target)) {
+                        document.getElementById('user-dropdown').classList.add('hidden');
+                    }
+                });
+                
+                // 移动端菜单
+                document.getElementById('mobile-menu-button').addEventListener('click', () => {
+                    document.getElementById('mobile-menu').classList.toggle('hidden');
+                });
+                
+                // 头像上传
+                document.querySelector('#avatar-preview').parentElement.addEventListener('click', () => {
+                    document.getElementById('avatar-upload').click();
+                });
+                
+                // 头像选择变化
+                document.getElementById('avatar-upload').addEventListener('change', (e) => {
+                    this.handleAvatarUpload(e);
+                });
+                
+                // 保存头像按钮
+                document.getElementById('save-avatar').addEventListener('click', () => {
+                    this.saveAvatar();
+                });
+                
+                // 保存个人信息按钮
+                document.getElementById('save-info').addEventListener('click', () => {
+                    this.saveUserInfo();
+                });
+                
+                // 修改密码按钮
+                document.getElementById('change-password').addEventListener('click', () => {
+                    this.changePassword();
+                });
+                
+                // 个人信息表单实时验证
+                document.getElementById('settings-name').addEventListener('input', () => {
+                    const name = document.getElementById('settings-name').value.trim();
+                    const nameError = document.getElementById('settings-name-error');
+                    if (name) {
+                        document.getElementById('settings-name').classList.remove('border-red-500');
+                        nameError.classList.add('hidden');
+                    }
+                });
+                
+                // 密码修改表单实时验证
+                document.getElementById('current-password').addEventListener('input', () => {
+                    const currentPassword = document.getElementById('current-password').value;
+                    const currentPasswordError = document.getElementById('current-password-error');
+                    if (currentPassword) {
+                        document.getElementById('current-password').classList.remove('border-red-500');
+                        currentPasswordError.classList.add('hidden');
+                    }
+                });
+                
+                document.getElementById('new-password').addEventListener('input', () => {
+                    const newPassword = document.getElementById('new-password').value;
+                    this.validatePasswordStrength(newPassword);
+                });
+                
+                document.getElementById('confirm-password').addEventListener('input', () => {
+                    const newPassword = document.getElementById('new-password').value;
+                    const confirmPassword = document.getElementById('confirm-password').value;
+                    const confirmPasswordError = document.getElementById('confirm-password-error');
+                    if (newPassword === confirmPassword) {
+                        document.getElementById('confirm-password').classList.remove('border-red-500');
+                        confirmPasswordError.classList.add('hidden');
+                    }
+                });
+                
+                // 个人资料链接
+                document.getElementById('profile-link').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    window.location.href = 'profile.html';
+                });
+                
+                // 退出登录链接
+                document.getElementById('logout-link').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.logout();
+                });
+            }
+        }
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', () => {
+            const app = new WangpuCommunityApp();
+        });
+    </script>
+</body>
+</html>
